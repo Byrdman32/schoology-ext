@@ -1,27 +1,25 @@
 const assignmentID = window.location.href.split('/')[4];
 
 let assignmentName;
-let gradeText;
-let btnSubmit;
+let gradeText = '.grading-grade span.received-grade';
+let btnSubmit = `a[href="/assignment/${assignmentID}/dropbox/submit"].link-btn`;
 
 let assignmentArray = [];
 
-let btnMarkDone = false;
-let markedDone;
+let btnMarkDone = '#schoology-check-mark-done';
+let markedDone = false;
 
 $(document).ready(async () => {
   // Initialize variables
-  assignmentName = $("h2.page-title").html();
-  gradeText = $('.grading-grade span.received-grade');
-  btnSubmit = $(`a[href="/assignment/${assignmentID}/dropbox/submit"].link-btn`);
+  assignmentName = $('h2.page-title').html();
 
   // Create Mark as Done button
-  btnSubmit.parent().after('<div class="" id="schoology-check-mark-done"></div>');
-  btnMarkDone = $("#schoology-check-mark-done");
+  if ($(btnSubmit).is(':visible')) $(btnSubmit).parent().after('<div class="" id="schoology-check-mark-done"></div>');
+  else $('.posted-time').after('<div class="" id="schoology-check-mark-done"></div>');
 
   updateMarkDoneBtn();
 
-  btnMarkDone.on("click", () => {
+  $(btnMarkDone).on("click", () => {
     markedDone = !markedDone;
     updateMarkDoneBtn();
     if (markedDone) addCompletedAssignment();
@@ -35,11 +33,8 @@ $(document).ready(async () => {
     return;
   }
 
-  /* This call will do one of three things:
-   * 1: If the assignment is not complete, it will do nothing
-   * 2: If the assignment is complete and already stored, it will update the description and btnMarkDone
-   * 3: If the assignment is complete and not stored, it will store it and update the description and btnMarkDone. */
-  addCompletedAssignment();
+
+  setTimeout(updateInterval, 100);
 
   // If assignment is completed, update markDoneBtn and markedDone.
   if (assignmentArray.some((obj) => obj.id === assignmentID)) {
@@ -47,6 +42,20 @@ $(document).ready(async () => {
     updateMarkDoneBtn();
   }
 });
+
+/* This call to addCompletedAssignment() will do one of three things:
+   * 1: If the assignment is not complete, it will do nothing
+   * 2: If the assignment is complete and already stored, it will update the description and btnMarkDone
+   * 3: If the assignment is complete and not stored, it will store it and update the description and btnMarkDone. */
+const updateInterval = function () {
+  if (addCompletedAssignment() === '') {
+    if (typeof $(btnMarkDone) === "undefined") {
+      if ($(btnSubmit).is(':visible')) $(btnSubmit).parent().after('<div class="" id="schoology-check-mark-done"></div>');
+      else $('.posted-time').after('<div class="" id="schoology-check-mark-done"></div>');
+      updateMarkDoneBtn();
+    }
+  }
+}
 
 const removeCompletedAssignment = function () {
   if (!(assignmentArray.some((obj) => obj.id === assignmentID))) return;
@@ -73,17 +82,18 @@ const addCompletedAssignment = function () {
     });
 
     set(assignments, assignmentArray);
+    return description;
   }
 };
 
 // Update text and styling of btnMarkDone
 const updateMarkDoneBtn = function () {
   if (markedDone) {
-    btnMarkDone.addClass('active');
-    btnMarkDone.html(getCompletionDescription());
+    $(btnMarkDone).addClass('active');
+    $(btnMarkDone).html(getCompletionDescription());
   } else {
-    btnMarkDone.removeClass('active');
-    btnMarkDone.html('Mark as Done');
+    $(btnMarkDone).removeClass('active');
+    $(btnMarkDone).html('Mark as Done');
   }
 };
 
@@ -99,18 +109,18 @@ const updateDescription = function () {
 };
 
 /* Get the description of the completed assignment (whether it was submitted, graded, etc.)
- * If the assignment is not complete "" is returned. */
+ * If the assignment is not complete '' is returned. */
 const getCompletionDescription = function () {
   // If gradeText exists
-  if (gradeText[0]) {
+  if ($(gradeText)[0]) {
     return 'Graded';
   }
 
-  if (btnSubmit.text() !== 'Submit Assignment') {
+  if ($(btnSubmit).text() !== 'Submit Assignment' && $(btnSubmit).is(':visible')) {
     return 'Submitted';
   }
 
-  if (btnMarkDone.hasClass('active')) {
+  if ($(btnMarkDone).hasClass('active')) {
     return 'Marked as Done';
   }
 

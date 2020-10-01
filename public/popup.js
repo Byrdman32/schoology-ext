@@ -22,9 +22,9 @@ $(document).ready()
   get(completedColor, local).then((color) => {
 
     if (updateColors(color)) {
-      btnColor.style.border = "2px solid";
+      btnColor.style.border = '2px solid';
     } else {
-      btnColor.style.border = "0";
+      btnColor.style.border = '0';
     }
 
     colorPicker.value = color;
