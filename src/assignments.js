@@ -8,105 +8,97 @@ let assignmentArray = [];
 
 let btnMarkDone = '#schoology-check-mark-done';
 let markedDone = false;
+let manOverride = false;
 
 $(document).ready(async () => {
   // Initialize variables
   assignmentName = $('h2.page-title').html();
 
+  // Get assignmentArray from storage and update markedDone
+  assignmentArray = await get(assignments);
+  markedDone = assignmentArray.some((obj) => obj.id === assignmentID);
+
+
   // Create Mark as Done button
   if ($(btnSubmit).is(':visible')) $(btnSubmit).parent().after('<div class="" id="schoology-check-mark-done"></div>');
   else $('.posted-time').after('<div class="" id="schoology-check-mark-done"></div>');
 
-  updateMarkDoneBtn();
+  updateState();
 
   $(btnMarkDone).on("click", () => {
     markedDone = !markedDone;
-    updateMarkDoneBtn();
-    if (markedDone) addCompletedAssignment();
-    else removeCompletedAssignment();
+    manOverride = true;
+
+    if (markedDone) {
+      $(btnMarkDone).addClass('active');
+
+      const description = getCompletionDescription();
+      if (description !== '') addCompletedAssignment(description);
+    } else {
+      $(btnMarkDone).removeClass('active');
+      removeCompletedAssignment();
+    }
+
+    updateBtnMarkDone();
   });
 
-  assignmentArray = await get(assignments);
 
-  if (!Array.isArray(assignmentArray)) {
-    assignmentArray = [];
-    return;
-  }
-
-
-  setTimeout(updateInterval, 100);
-
-  // If assignment is completed, update markDoneBtn and markedDone.
-  if (assignmentArray.some((obj) => obj.id === assignmentID)) {
-    markedDone = true;
-    updateMarkDoneBtn();
-  }
 });
 
-/* This call to addCompletedAssignment() will do one of three things:
-   * 1: If the assignment is not complete, it will do nothing
-   * 2: If the assignment is complete and already stored, it will update the description and btnMarkDone
-   * 3: If the assignment is complete and not stored, it will store it and update the description and btnMarkDone. */
-const updateInterval = function () {
-  if (addCompletedAssignment() === '') {
-    if (typeof $(btnMarkDone) === "undefined") {
-      if ($(btnSubmit).is(':visible')) $(btnSubmit).parent().after('<div class="" id="schoology-check-mark-done"></div>');
-      else $('.posted-time').after('<div class="" id="schoology-check-mark-done"></div>');
-      updateMarkDoneBtn();
+// Update the state of the assignment--whether or not its completed, and btnMarkDone
+// This will mark assignment as done if user submits the assignment
+const updateState = function () {
+  /* If the user has interacted with the button (ie. to manually mark a completed assignment as incomplete),
+   * then the assignment should not automatically complete or incomplete itself.
+   * Instead, the description of the assignment (if it is completed should update)
+   * (ie. if the assignment was manually marked done, then submitted, the extension should record "Submitted")
+   * and the button should be updated.
+   */
+
+  if (manOverride) {
+    if (assignmentArray.some((obj) => obj.id === assignmentID && obj.description !== getCompletionDescription())) {
+      assignmentArray.forEach((obj) => {
+        if (obj.id === assignmentID) obj.description = getCompletionDescription();
+      });
+    }
+  } else {
+    // If assignment is submitted or graded, add it to storage
+    if (getCompletionDescription() !== '') {
+      addCompletedAssignment(getCompletionDescription());
+      markedDone = true;
+      if (markedDone) $(btnMarkDone).addClass('active');
     }
   }
+
+  updateBtnMarkDone();
+  setTimeout(updateState, 100);
 }
 
-const removeCompletedAssignment = function () {
-  if (!(assignmentArray.some((obj) => obj.id === assignmentID))) return;
-
-  assignmentArray = assignmentArray.filter((obj) => obj.id !== assignmentID);
-  set(assignments, assignmentArray);
-}
-
-// Check if this assignment is completed, and if so, add it to storage.
-const addCompletedAssignment = function () {
-  // If this assignment is already completed and stored, just update the description.
-  if (assignmentArray.some((obj) => obj.id === assignmentID)) {
-    updateDescription();
-    return;
-  }
-
-  const description = getCompletionDescription();
-
-  if (description !== '') {
+// Mark this assignment as completed, and add it to storage
+const addCompletedAssignment = function (description) {
+  if (!assignmentArray.some((obj) => obj.id === assignmentID)) {
     assignmentArray.push({
       id: assignmentID,
       name: assignmentName,
       description: description
     });
-
-    set(assignments, assignmentArray);
-    return description;
   }
-};
-
-// Update text and styling of btnMarkDone
-const updateMarkDoneBtn = function () {
-  if (markedDone) {
-    $(btnMarkDone).addClass('active');
-    $(btnMarkDone).html(getCompletionDescription());
-  } else {
-    $(btnMarkDone).removeClass('active');
-    $(btnMarkDone).html('Mark as Done');
-  }
-};
-
-/* Update the description of this completed assignment.
- * For example, if this assignment was submitted, but is now graded,
- * the description should update to Graded. */
-const updateDescription = function () {
-  $.each(assignmentArray, (obj) => {
-    if (obj.id === assignmentID) obj.description = getCompletionDescription();
-  });
 
   set(assignments, assignmentArray);
-};
+}
+
+// Mark this assignment as incomplete, and remove it from storage
+const removeCompletedAssignment = function () {
+  assignmentArray.filter((obj) => obj.id !== assignmentID);
+  set(assignments, assignmentArray);
+
+}
+
+// Make button visible if it disappeared, and update its description
+const updateBtnMarkDone = function () {
+  if (!$(btnMarkDone).is(":visible")) $(btnMarkDone).show();
+  $(btnMarkDone).html(markedDone ? getCompletionDescription() : 'Mark as Done');
+}
 
 /* Get the description of the completed assignment (whether it was submitted, graded, etc.)
  * If the assignment is not complete '' is returned. */
@@ -120,7 +112,7 @@ const getCompletionDescription = function () {
     return 'Submitted';
   }
 
-  if ($(btnMarkDone).hasClass('active')) {
+  if (markedDone) {
     return 'Marked as Done';
   }
 
