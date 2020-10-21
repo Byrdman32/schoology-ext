@@ -16,7 +16,10 @@
         "*://cfisd.schoology.com/",
         "*://cfisd.schoology.com/home",
         "*://cfisd.schoology.com/home/*",
+        "*://lms.lausd.net/home/*",
+        "*://lms.lausd.net/",
         "*://schoology.westportps.org/",
+        "*://schoology.westportps.org/home",
         "*://schoology.westportps.org/home",
         "*://*.schoology.com/",
         "*://*.schoology.com/home",
@@ -40,7 +43,8 @@
         "*://app.schoology.com/course/*",
         "*://fuhsd.schoology.com/course/*",
         "*://cfisd.schoology.com/course/*",
-        "https://schoology.westportps.org/course/*",
+        "*://lms.lausd.net/course/*",
+        "*://schoology.westportps.org/course/*",
         "*://*.schoology.com/course/*",
         "*://*/course/*"
       ],
@@ -60,7 +64,8 @@
         "*://app.schoology.com/assignment/*",
         "*://fuhsd.schoology.com/assignment/*",
         "*://cfisd.schoology.com/assignment/*",
-        "https://schoology.westportps.org/assignment/*",
+        "*://lms.lausd.net/assignment/*",
+        "*://schoology.westportps.org/assignment/*",
         "*://*.schoology.com/assignment/*",
         "*://*/assignment/*"
       ],
@@ -76,8 +81,9 @@
     },
     {
       "matches": [
-        "https://schoology.westportps.org/calendar/*",
-        "https://*.schoology.com/calendar/*"
+        "*://schoology.westportps.org/calendar/*",
+        "*://lms.lausd.net/calendar/*",
+        "*://*.schoology.com/calendar/*"
       ],
       "js": [
         "src/jquery-3.5.0.min.js",
