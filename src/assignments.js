@@ -16,8 +16,9 @@ $(document).ready(async () => {
 
   // Get assignmentArray from storage and update markedDone
   assignmentArray = await get(assignments);
-  markedDone = assignmentArray.some((obj) => obj.id === assignmentID);
+  if (typeof assignmentArray === 'undefined') assignmentArray = [];
 
+  markedDone = assignmentArray.some((obj) => obj.id === assignmentID);
 
   // Create Mark as Done button
   if ($(btnSubmit).is(':visible')) $(btnSubmit).parent().after('<div class="" id="schoology-check-mark-done"></div>');
@@ -55,27 +56,31 @@ const updateState = function () {
    * and the button should be updated.
    */
 
+  const desc = getCompletionDescription();
   if (manOverride) {
-    if (assignmentArray.some((obj) => obj.id === assignmentID && obj.description !== getCompletionDescription())) {
+    if (assignmentArray.some((obj) => obj.id === assignmentID && obj.description !== desc)) {
       assignmentArray.forEach((obj) => {
-        if (obj.id === assignmentID) obj.description = getCompletionDescription();
+        if (obj.id === assignmentID) obj.description = desc;
       });
     }
   } else {
     // If assignment is submitted or graded, add it to storage
-    if (getCompletionDescription() !== '') {
-      addCompletedAssignment(getCompletionDescription());
+    if (desc !== '') {
+      addCompletedAssignment(desc);
       markedDone = true;
       if (markedDone) $(btnMarkDone).addClass('active');
     }
   }
 
   updateBtnMarkDone();
-  setTimeout(updateState, 100);
+  setTimeout(updateState, 1000);
 }
 
 // Mark this assignment as completed, and add it to storage
-const addCompletedAssignment = function (description) {
+const addCompletedAssignment = async (description) => {
+  const storageArr = await get(assignments);
+  if (typeof storageArr !== 'undefined' && storageArr.some((obj) => obj.id === assignmentID)) return;
+
   if (!assignmentArray.some((obj) => obj.id === assignmentID)) {
     assignmentArray.push({
       id: assignmentID,
@@ -89,7 +94,8 @@ const addCompletedAssignment = function (description) {
 
 // Mark this assignment as incomplete, and remove it from storage
 const removeCompletedAssignment = function () {
-  assignmentArray.filter((obj) => obj.id !== assignmentID);
+  assignmentArray = assignmentArray.filter((obj) => obj.id !== assignmentID);
+  console.log(assignmentArray);
   set(assignments, assignmentArray);
 
 }
