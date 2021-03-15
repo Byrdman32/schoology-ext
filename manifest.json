@@ -25,6 +25,9 @@
         "*://*.schoology.com/home",
         "*://*.schoology.com/home/*",
         "*://*/home",
+	"*://littlerocksd.schoology.com/",
+        "*://littlerocksd.schoology.com/home",
+        "*://littlerocksd.schoology.com/home/*",
         "*://*/home/*"
       ],
       "js": [
@@ -46,6 +49,7 @@
         "*://lms.lausd.net/course/*",
         "*://schoology.westportps.org/course/*",
         "*://*.schoology.com/course/*",
+	"*://littlerocksd.schoology.com/course/*",
         "*://*/course/*"
       ],
       "js": [
@@ -66,6 +70,7 @@
         "*://cfisd.schoology.com/assignment/*",
         "*://lms.lausd.net/assignment/*",
         "*://schoology.westportps.org/assignment/*",
+	"*://littlerocksd.schoology.com/assignment/*",
         "*://*.schoology.com/assignment/*",
         "*://*/assignment/*"
       ],
@@ -83,6 +88,7 @@
       "matches": [
         "*://schoology.westportps.org/calendar/*",
         "*://lms.lausd.net/calendar/*",
+	"*://littlerocksd.schoology.com/calendar/*",
         "*://*.schoology.com/calendar/*"
       ],
       "js": [
