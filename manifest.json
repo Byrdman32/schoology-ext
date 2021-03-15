@@ -16,6 +16,9 @@
         "*://cfisd.schoology.com/",
         "*://cfisd.schoology.com/home",
         "*://cfisd.schoology.com/home/*",
+        "*://littlerocksd.schoology.com/",
+        "*://littlerocksd.schoology.com/home",
+        "*://littlerocksd.schoology.com/home/*",
         "*://*.schoology.com/",
         "*://*.schoology.com/home",
         "*://*.schoology.com/home/*",
@@ -30,6 +33,7 @@
         "*://app.schoology.com/assignment/*",
         "*://fuhsd.schoology.com/assignment/*",
         "*://cfisd.schoology.com/assignment/*",
+        "*://littlerocksd.schoology.com/assignment/*",
         "*://*.schoology.com/assignment/*",
         "*://*/assignment/*"
       ],
